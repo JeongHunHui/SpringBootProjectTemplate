@@ -23,7 +23,7 @@
 2. gradle 빌드하기 → build.gradle 우클릭 → Link Gradle Project 클릭
 3. 패키지 이름 변경하기
     
-    ![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/7143f6ef-5ab7-40ec-9f1c-ef89c8b7b972/Untitled.png)
+    ![image](https://user-images.githubusercontent.com/108508730/205462313-f2112b66-058d-41ae-94c5-a79eb5662848.png)
     
     IntelliJ를 통해 변경하면 클래스에 있는 패키지 정보도 다 업데이트된다(위의 사진에서 All Directories 클릭)
     
