@@ -1,0 +1,4 @@
+[submodule "src/main/resources/security"]
+	path = src/main/resources/security
+	url = Submodule Repository 주소
+	branch = master

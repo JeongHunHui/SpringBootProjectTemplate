@@ -1,0 +1,73 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '2.7.5'
+	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+	id 'com.google.cloud.tools.jib' version '3.2.1'
+	id 'jacoco'
+}
+
+jib {
+	from {
+		image = "openjdk:11-jre-slim"
+		auth {
+			username = project.DOCKER_ID
+			password = project.DOCKER_PASSWORD
+		}
+	}
+	to {
+		image = project.DOCKER_ID + "/" + project.DOCKER_IMAGE_NAME
+		auth {
+			username = project.DOCKER_ID
+			password = project.DOCKER_PASSWORD
+		}
+		tags = ["latest"]
+	}
+	container {
+		jvmFlags = ["-Xms128m", "-Xmx128m"]
+	}
+}
+
+group = 'com.springboot'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: '2.7.5'
+	implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'
+	compileOnly 'org.projectlombok:lombok'
+	runtimeOnly 'com.h2database:h2'
+	runtimeOnly 'org.postgresql:postgresql'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}
+
+jacoco {
+	toolVersion = "0.8.8" // 버전 명시
+}
+
+jacocoTestReport {
+	dependsOn test // 리포트 생성 전에 test를 반드시 수행해야 한다!
+	reports { // 어떤 파일들을 생성할지, 어디에 생성할지 설정
+		xml.enabled true // xml과 html형식으로 결과물을 만들어내라!
+		html.enabled true
+		// 경로 명시 안 할 경우 기본 경로는 build/reports/jacoco 이하 경로
+	}
+}
