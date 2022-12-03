@@ -17,7 +17,10 @@ import springfox.documentation.spring.web.plugins.Docket;
 public class SwaggerConfig {
 
   private ApiInfo swaggerInfo() {
-    return new ApiInfoBuilder().title("TemplateProject API").description("TemplateProject API Docs").build();
+    return new ApiInfoBuilder()
+        .title("TemplateProject API")
+        .description("TemplateProject API Docs")
+        .build();
   }
 
   @Bean

@@ -1,19 +1,16 @@
 package com.springboot.template.global.error;
 
+import static com.springboot.template.global.error.ErrorCode.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import static com.springboot.template.global.error.ErrorCode.*;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.springboot.template.global.error.exception.BusinessException;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-
-import com.springboot.template.global.error.exception.BusinessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,88 +24,86 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
 @ContextConfiguration(
-        classes = {GlobalExceptionHandlerTest.TestController.class, GlobalExceptionHandler.class})
+    classes = {GlobalExceptionHandlerTest.TestController.class, GlobalExceptionHandler.class})
 @WebMvcTest(controllers = GlobalExceptionHandlerTest.TestController.class)
 class GlobalExceptionHandlerTest {
-    private MockMvc mockMvc;
+  private MockMvc mockMvc;
 
-    private ObjectMapper objectMapper;
+  private ObjectMapper objectMapper;
 
-    @BeforeEach
-    void setUp(WebApplicationContext webApplicationContext) {
-        mockMvc =
-                MockMvcBuilders.webAppContextSetup(webApplicationContext)
-                        .addFilters(new CharacterEncodingFilter("UTF-8", true))
-                        .build();
+  @BeforeEach
+  void setUp(WebApplicationContext webApplicationContext) {
+    mockMvc =
+        MockMvcBuilders.webAppContextSetup(webApplicationContext)
+            .addFilters(new CharacterEncodingFilter("UTF-8", true))
+            .build();
 
-        objectMapper = new ObjectMapper();
+    objectMapper = new ObjectMapper();
+  }
+
+  @DisplayName("잘못된 input 예외 handler test")
+  @Test
+  void handleMethodArgumentNotValidException() throws Exception {
+    MockRequest mockRequest = new MockRequest(0);
+
+    mockMvc
+        .perform(
+            post("/exception")
+                .content(objectMapper.writeValueAsString(mockRequest))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.businessCode").value(INPUT_INVALID_VALUE.getCode()))
+        .andDo(print());
+  }
+
+  @Test
+  @DisplayName("business 예외 handler test")
+  void handleBusinessException() throws Exception {
+    mockMvc
+        .perform(get("/exception/1"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.businessCode").value(EXAMPLE_USER_ERROR.getCode()))
+        .andDo(print());
+  }
+
+  @Test
+  @DisplayName("500 에러 handler test")
+  void handleException() throws Exception {
+    mockMvc
+        .perform(
+            post("/exception")
+                .content(objectMapper.writeValueAsString(new MockRequest(1)))
+                .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isInternalServerError())
+        .andExpect(jsonPath("$.businessCode").value(INTERNAL_SERVER_ERROR.getCode()))
+        .andDo(print());
+  }
+
+  private static class MockRequest {
+    @Positive private int ping;
+
+    public MockRequest() {}
+
+    public MockRequest(int ping) {
+      this.ping = ping;
     }
 
-    @DisplayName("잘못된 input 예외 handler test")
-    @Test
-    void handleMethodArgumentNotValidException() throws Exception {
-        MockRequest mockRequest = new MockRequest(0);
+    public int getPing() {
+      return ping;
+    }
+  }
 
-        mockMvc
-                .perform(
-                        post("/exception")
-                                .content(objectMapper.writeValueAsString(mockRequest))
-                                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.businessCode").value(INPUT_INVALID_VALUE.getCode()))
-                .andDo(print());
+  @RestController
+  @RequestMapping("/exception")
+  static class TestController {
+    @GetMapping("/{id}")
+    public String executeBusinessException(@PathVariable Long id) {
+      throw new BusinessException(EXAMPLE_USER_ERROR);
     }
 
-    @Test
-    @DisplayName("business 예외 handler test")
-    void handleBusinessException() throws Exception {
-        mockMvc
-                .perform(get("/exception/1"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.businessCode").value(EXAMPLE_USER_ERROR.getCode()))
-                .andDo(print());
+    @PostMapping
+    public String executeException(@RequestBody @Valid MockRequest mockRequest) {
+      throw new RuntimeException();
     }
-
-    @Test
-    @DisplayName("500 에러 handler test")
-    void handleException() throws Exception {
-        mockMvc
-                .perform(
-                        post("/exception")
-                                .content(objectMapper.writeValueAsString(new MockRequest(1)))
-                                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError())
-                .andExpect(jsonPath("$.businessCode").value(INTERNAL_SERVER_ERROR.getCode()))
-                .andDo(print());
-    }
-
-    private static class MockRequest {
-        @Positive
-        private int ping;
-
-        public MockRequest() {
-        }
-
-        public MockRequest(int ping) {
-            this.ping = ping;
-        }
-
-        public int getPing() {
-            return ping;
-        }
-    }
-
-    @RestController
-    @RequestMapping("/exception")
-    static class TestController {
-        @GetMapping("/{id}")
-        public String executeBusinessException(@PathVariable Long id) {
-            throw new BusinessException(EXAMPLE_USER_ERROR);
-        }
-
-        @PostMapping
-        public String executeException(@RequestBody @Valid MockRequest mockRequest) {
-            throw new RuntimeException();
-        }
-    }
+  }
 }

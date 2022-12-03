@@ -36,7 +36,8 @@ public class GlobalExceptionHandler {
   @ExceptionHandler
   protected ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
       MethodArgumentNotValidException e) {
-    final ErrorResponse response = ErrorResponse.of(ErrorCode.INPUT_INVALID_VALUE, e.getBindingResult());
+    final ErrorResponse response =
+        ErrorResponse.of(ErrorCode.INPUT_INVALID_VALUE, e.getBindingResult());
     log.warn(e.getMessage());
     return new ResponseEntity<>(response, BAD_REQUEST);
   }
