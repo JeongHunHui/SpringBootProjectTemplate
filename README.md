@@ -1,3 +1,19 @@
+# 템플릿에 적용되어 있는 기능들
+
+- PostgreSQL
+- H2 및 테스트용 application.yml
+- JIB(gradle.properties을 활용)
+- DockerCompose
+- Swagger
+- GlobalErrorHandler 등 에러관련
+- ResultResponse 등 결과 반환 관련
+- BaseEntity, AuditingConfig(모든 엔티티에 생성시간, 업데이트시간, 삭제여부 컬럼 추가)
+- 서브모듈로 민감한 정보를 담고있는 application.yml 관리
+- jacoco
+- google java format github action
+- pull request, issue(기능구현, 리팩토링, 환경설정, 오류수정) 템플릿
+- lombok
+
 # 템플릿을 활용한 프로젝트 초기 세팅하기
 
 1. gradle.properties 와 .env 추가하기
