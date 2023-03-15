@@ -1,4 +1,4 @@
-# Contributed By kim1387
+# Contributed By [kim1387](https://github.com/kim1387)
 # 템플릿에 적용되어 있는 기능들
 
 - PostgreSQL
